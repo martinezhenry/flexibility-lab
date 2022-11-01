@@ -17,23 +17,28 @@ public class ProfitService implements IProfitService {
 
     public ProfitService() {
         this.webClient = WebClient.builder()
-                .baseUrl("http://localhost:8080")
+                .baseUrl("http://localhost:8083")
                 .build();
     }
 
 
     @Override
     public void processProfit(String profit, String formatId) {
+        log.info("send profit to scan, formatId: {}, profit: {}", formatId, profit);
         this.webClient.post()
                 .uri("scan/process")
-                .body(profit, String.class)
+                .bodyValue(profit)
                 .header("format-id", formatId)
+                .header("content-type", "application/json")
                 .retrieve()
                 .onStatus(HttpStatus::isError, response -> {
-                    log.error("profit ERROR, status: {}", response.rawStatusCode());
-                    return Mono.error(new Throwable("Error"));
+                    ///log.error("profit ERROR, status: {}, ", response.rawStatusCode());
+                    return Mono.empty();
                 })
-                .bodyToMono(Profit.class);
+                .bodyToMono(Profit.class)
+                .doOnSuccess(p -> log.info("profit event sent"))
+                .doOnError(p -> log.info("profit event sent"))
+                .subscribe();
 
     }
 }

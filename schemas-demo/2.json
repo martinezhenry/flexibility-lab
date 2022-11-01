@@ -1,0 +1,7 @@
+{
+  "time": "fecha",
+  "id": "clientId",
+  "price": "value",
+  "month": "period",
+  "organization": "clientType"
+}
